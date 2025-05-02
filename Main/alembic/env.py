@@ -1,9 +1,14 @@
 from logging.config import fileConfig
+import os
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from src.database import Base
 from src.models import user, vacancy, resume, resume_stage, sla_settings
@@ -13,6 +18,10 @@ target_metadata = Base.metadata
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+config.set_main_option(
+    "sqlalchemy.url",
+    os.getenv("DATABASE_URL", "postgresql://postgres:postgres@db:5432/hrMonitor")
+)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
