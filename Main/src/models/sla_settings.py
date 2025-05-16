@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from src.database import Base
 from datetime import datetime, timezone
 
-class SLASetting(Base):
+class SLASettings(Base):
     __tablename__ = "sla_settings"
 
     id = Column(Integer, primary_key=True, index=True)
