@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, asc, desc
 from datetime import datetime, timezone
 from src import models
+import pandas as pd
 
 def get_user_by_id(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
@@ -76,7 +77,7 @@ def get_resumes(
     elif sort_by == "sla_due":
         order = asc(models.Resume.created_at) if sort_order == "asc" else desc(models.Resume.created_at)
         query = query.order_by(order)
-    return query.all()
+    return query.all()  # Должен возвращать список объектов Resume
 
 def get_statistics(db: Session, user_id: int = None):
     query = db.query(models.Resume)
@@ -119,10 +120,15 @@ def get_statistics(db: Session, user_id: int = None):
 
     sla_violations_count = 0
 
+    # Преобразование кортежей в DataFrame и далее в список словарей
+    avg_stage_times_df = pd.DataFrame(avg_stage_times, columns=["stage", "avg_seconds"])
+    resumes_per_stage_df = pd.DataFrame(resumes_per_stage, columns=["stage", "count"])
+    resumes_per_source_df = pd.DataFrame(resumes_per_source, columns=["source", "count"])
+
     return {
-        "avg_stage_times": avg_stage_times,
-        "resumes_per_stage": resumes_per_stage,
-        "resumes_per_source": resumes_per_source,
+        "avg_stage_times": avg_stage_times_df.to_dict(orient="records"),
+        "resumes_per_stage": resumes_per_stage_df.to_dict(orient="records"),
+        "resumes_per_source": resumes_per_source_df.to_dict(orient="records"),
         "avg_candidates_per_vacancy": avg_candidates_per_vacancy,
         "sla_violations": sla_violations_count
     }
@@ -159,4 +165,4 @@ def create_user(db: Session, user_data: dict):
     db.add(user)
     db.commit()
     db.refresh(user)
-    return user
+    return user  # Должен возвращать объект User
